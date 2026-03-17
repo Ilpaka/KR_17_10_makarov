@@ -61,6 +61,7 @@ func main() {
 		news.GET("/products", get_products)
 		news.GET("/products/:id", get_products_by_id)
 		news.POST("/add_products", create_products)
+		news.PUT("/products/:id", update_product_by_id)
 		news.DELETE("/products/:id", delete_product_by_id)
 	}
 
@@ -150,6 +151,31 @@ func get_products_by_id(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": get_new})
+}
+
+func update_product_by_id(c *gin.Context) {
+	updateID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный формат id"})
+		return
+	}
+
+	var updated Products
+	if err := c.ShouldBindJSON(&updated); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	for i := range products {
+		if products[i].Id == updateID {
+			updated.Id = updateID
+			products[i] = updated
+			c.JSON(http.StatusOK, products[i])
+			return
+		}
+	}
+
+	c.JSON(http.StatusNotFound, gin.H{"error": "Продукт не найден"})
 }
 
 func delete_product_by_id(c *gin.Context) {
