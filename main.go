@@ -68,9 +68,51 @@ func main() {
 }
 
 func get_products(c *gin.Context) {
-	{
-		c.JSON(http.StatusOK, gin.H{"data": products})
+	result := make([]Products, 0, len(products))
+
+	minPriceStr := c.Query("min_price")
+	maxPriceStr := c.Query("max_price")
+	inStockStr := c.Query("in_stock")
+
+	var minPrice, maxPrice *int
+	if minPriceStr != "" {
+		v, err := strconv.Atoi(minPriceStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный формат min_price"})
+			return
+		}
+		minPrice = &v
 	}
+	if maxPriceStr != "" {
+		v, err := strconv.Atoi(maxPriceStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный формат max_price"})
+			return
+		}
+		maxPrice = &v
+	}
+
+	if minPrice != nil && maxPrice != nil && *minPrice > *maxPrice {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "min_price должен быть меньше или равен max_price"})
+		return
+	}
+
+	filterInStock := inStockStr == "1" || strings.EqualFold(inStockStr, "true")
+
+	for _, p := range products {
+		if minPrice != nil && p.Price < *minPrice {
+			continue
+		}
+		if maxPrice != nil && p.Price > *maxPrice {
+			continue
+		}
+		if filterInStock && p.InStock <= 0 {
+			continue
+		}
+		result = append(result, p)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
 func create_products(c *gin.Context) {
