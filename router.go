@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
+
+	r.POST("/auth/token", handleAuthToken)
 
 	api := r.Group("").Use(authMiddleware())
 	{
@@ -21,6 +25,19 @@ func setupRouter() *gin.Engine {
 	}
 
 	return r
+}
+
+func handleAuthToken(c *gin.Context) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+		"iat": time.Now().Unix(),
+	})
+	signed, err := token.SignedString([]byte(settings.JwtSecret))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"token": signed})
 }
 
 func handleGetProducts(c *gin.Context) {

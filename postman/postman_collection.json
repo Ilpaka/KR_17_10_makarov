@@ -1,0 +1,274 @@
+{
+	"info": {
+		"_postman_id": "makarov-products-api",
+		"name": "Products API",
+		"description": "Тесты API продуктов. Сначала запусти 'Get token' — он получит и сохранит JWT. Затем используй остальные запросы.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8090"
+		},
+		{
+			"key": "jwt_token",
+			"value": "YOUR_JWT_TOKEN_HERE"
+		},
+		{
+			"key": "product_id",
+			"value": "1"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Get token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"if (body.token) { pm.collectionVariables.set('jwt_token', body.token); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "POST",
+						"url": "{{base_url}}/auth/token"
+					}
+				},
+				{
+					"name": "Without token (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 401', () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {"type": "noauth"},
+						"method": "GET",
+						"url": "{{base_url}}/products"
+					}
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', () => pm.response.to.have.status(201));",
+									"pm.test('Response has product', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property('id');",
+									"    pm.expect(body).to.have.property('name');",
+									"    pm.expect(body).to.have.property('price');",
+									"    pm.expect(body).to.have.property('in_stock');",
+									"    if (body.id) pm.collectionVariables.set('product_id', body.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Тестовый продукт\",\n  \"price\": 100,\n  \"in_stock\": 50\n}"
+						},
+						"url": "{{base_url}}/add_products"
+					}
+				},
+				{
+					"name": "Get all products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Response has data array', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property('data');",
+									"    pm.expect(body.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{base_url}}/products"
+					}
+				},
+				{
+					"name": "Get products with filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Response has data', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property('data');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/products?min_price=10&max_price=500&in_stock=1",
+							"host": ["{{base_url}}"],
+							"path": ["products"],
+							"query": [
+								{"key": "min_price", "value": "10"},
+								{"key": "max_price", "value": "500"},
+								{"key": "in_stock", "value": "1"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get product by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Response has product', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property('data');",
+									"    pm.expect(body.data).to.have.property('id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{base_url}}/products/{{product_id}}"
+					}
+				},
+				{
+					"name": "Get product by ID (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 404', () => pm.response.to.have.status(404));",
+									"pm.test('Error message', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": "{{base_url}}/products/99999"
+					}
+				},
+				{
+					"name": "Update product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Product updated', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.name).to.eql('Обновлённый продукт');",
+									"    pm.expect(body.price).to.eql(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Обновлённый продукт\",\n  \"price\": 200,\n  \"in_stock\": 25\n}"
+						},
+						"url": "{{base_url}}/products/{{product_id}}"
+					}
+				},
+				{
+					"name": "Delete product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Delete message', () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"url": "{{base_url}}/products/{{product_id}}"
+					}
+				}
+			]
+		}
+	]
+}
