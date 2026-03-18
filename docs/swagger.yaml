@@ -31,12 +31,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: "Возвращает один товар\n\n**Реализация:**\n\n<pre><code>var p Products\n\tif
-        err := c.ShouldBindJSON(&p); err != nil {\n\t\tc.JSON(http.StatusBadRequest,
-        gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\n\n\tfunc serviceCreate(p
-        Products) Products {\n\t\treturn repoCreate(p)\n\t}\n\n\tfunc repoCreate(p
-        Products) Products {\n\tp.Id = int64(len(products) + 1)\n\tproducts = append(products,
-        p)\n\treturn p\n}\n</code></pre>\n"
+      description: "Создаёт новый товар.\n\n**Реализация:**\n\n<pre><code>func handleCreateProduct(c
+        *gin.Context) {\n\tvar p Products\n\tif err := c.ShouldBindJSON(&amp;p); err
+        != nil {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\n\tc.JSON(http.StatusCreated,
+        serviceCreate(p))\n}</code></pre>\n"
       parameters:
       - description: Product data
         in: body
@@ -62,7 +60,12 @@ paths:
       - Products
   /auth/token:
     post:
-      description: Returns a JWT token for API authentication
+      description: "Возвращает JWT токен для аутентификации API.\n\n**Реализация:**\n\n<pre><code>func
+        handleAuthToken(c *gin.Context) {\n\ttoken := jwt.NewWithClaims(jwt.SigningMethodHS256,
+        jwt.MapClaims{\n\t\t\"exp\": time.Now().Add(24 * time.Hour).Unix(),\n\t\t\"iat\":
+        time.Now().Unix(),\n\t})\n\tsigned, err := token.SignedString([]byte(settings.JwtSecret))\n\tif
+        err != nil {\n\t\tc.JSON(http.StatusInternalServerError, gin.H{\"error\":
+        err.Error()})\n\t\treturn\n\t}\n\tc.JSON(http.StatusOK, gin.H{\"token\": signed})\n}</code></pre>\n"
       produces:
       - application/json
       responses:
@@ -74,8 +77,6 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/main.ErrorResponse'
-      security:
-      - BearerAuth: []
       summary: Get JWT token
       tags:
       - Auth
@@ -127,7 +128,12 @@ paths:
       - Products
   /products/{id}:
     delete:
-      description: Deletes a product by ID
+      description: "Удаляет товар по ID.\n\n**Реализация:**\n\n<pre><code>func handleDeleteProduct(c
+        *gin.Context) {\n\tid, err := strconv.ParseInt(c.Param(\"id\"), 10, 64)\n\tif
+        err != nil {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": \"Некорректный
+        формат id\"})\n\t\treturn\n\t}\n\n\tif !serviceDelete(id) {\n\t\tc.JSON(http.StatusNotFound,
+        gin.H{\"error\": \"Продукт не найден\"})\n\t\treturn\n\t}\n\n\tc.JSON(http.StatusOK,
+        gin.H{\"message\": fmt.Sprintf(\"Продукт %d удалён\", id)})\n}</code></pre>\n"
       parameters:
       - description: Product ID
         in: path
@@ -187,7 +193,14 @@ paths:
     put:
       consumes:
       - application/json
-      description: Updates an existing product by ID
+      description: "Обновляет существующий товар по ID.\n\n**Реализация:**\n\n<pre><code>func
+        handleUpdateProduct(c *gin.Context) {\n\tid, err := strconv.ParseInt(c.Param(\"id\"),
+        10, 64)\n\tif err != nil {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\":
+        \"Некорректный формат id\"})\n\t\treturn\n\t}\n\n\tvar p Products\n\tif err
+        := c.ShouldBindJSON(&amp;p); err != nil {\n\t\tc.JSON(http.StatusBadRequest,
+        gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\n\tupdated := serviceUpdate(id,
+        p)\n\tif updated == nil {\n\t\tc.JSON(http.StatusNotFound, gin.H{\"error\":
+        \"Продукт не найден\"})\n\t\treturn\n\t}\n\n\tc.JSON(http.StatusOK, updated)\n}</code></pre>\n"
       parameters:
       - description: Product ID
         in: path

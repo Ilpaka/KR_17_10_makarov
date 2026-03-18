@@ -34,8 +34,7 @@ func setupRouter() *gin.Engine {
 }
 
 // @Summary Get JWT token
-// @Security BearerAuth
-// @Description Returns a JWT token for API authentication
+// @Description.markdown auth_token
 // @Tags Auth
 // @Produce json
 // @Success 200 {object} TokenResponse "JWT token"
@@ -96,7 +95,7 @@ func handleGetProducts(c *gin.Context) {
 
 // @Summary Handler Get Products by id
 // @Security BearerAuth
-// @Description.markdown get_products_by_id.md
+// @Description.markdown get_products_by_id
 // @Tags Products
 // @Produce json
 // @Param id path int true "Product ID"
@@ -141,7 +140,7 @@ func handleCreateProduct(c *gin.Context) {
 
 // @Summary Update product by id
 // @Security BearerAuth
-// @Description Updates an existing product by ID
+// @Description.markdown put_products
 // @Tags Products
 // @Accept json
 // @Produce json
@@ -175,7 +174,7 @@ func handleUpdateProduct(c *gin.Context) {
 
 // @Summary Delete product by id
 // @Security BearerAuth
-// @Description Deletes a product by ID
+// @Description.markdown delete_products
 // @Tags Products
 // @Produce json
 // @Param id path int true "Product ID"
