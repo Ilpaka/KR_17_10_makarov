@@ -1,0 +1,223 @@
+definitions:
+  main.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  main.Products:
+    properties:
+      id:
+        type: integer
+      in_stock:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  main.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+host: localhost:8090
+info:
+  contact: {}
+  description: JWT token
+  title: PRoducts API KR_17_03
+  version: "1.0"
+paths:
+  /add_products:
+    post:
+      consumes:
+      - application/json
+      description: "Возвращает один товар\n\n**Реализация:**\n\n<pre><code>var p Products\n\tif
+        err := c.ShouldBindJSON(&p); err != nil {\n\t\tc.JSON(http.StatusBadRequest,
+        gin.H{\"error\": err.Error()})\n\t\treturn\n\t}\n\n\n\tfunc serviceCreate(p
+        Products) Products {\n\t\treturn repoCreate(p)\n\t}\n\n\tfunc repoCreate(p
+        Products) Products {\n\tp.Id = int64(len(products) + 1)\n\tproducts = append(products,
+        p)\n\treturn p\n}\n</code></pre>\n"
+      parameters:
+      - description: Product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/main.Products'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created product
+          schema:
+            $ref: '#/definitions/main.Products'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Post Handler add_products
+      tags:
+      - Products
+  /auth/token:
+    post:
+      description: Returns a JWT token for API authentication
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token
+          schema:
+            $ref: '#/definitions/main.TokenResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get JWT token
+      tags:
+      - Auth
+  /products:
+    get:
+      description: "Возвращает список товаров с фильтрами.\n\n**Реализация:**\n\n<pre><code>func
+        handleGetProducts(c *gin.Context) {\n\tvar filter ProductFilter\n\n\tif s
+        := c.Query(\"min_price\"); s != \"\" {\n\t\tv, err := strconv.Atoi(s)\n\t\tif
+        err != nil {\n\t\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": \"Некорректный
+        формат min_price\"})\n\t\t\treturn\n\t\t}\n\t\tfilter.MinPrice = &amp;v\n\t}\n\tif
+        s := c.Query(\"max_price\"); s != \"\" {\n\t\tv, err := strconv.Atoi(s)\n\t\tif
+        err != nil {\n\t\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": \"Некорректный
+        формат max_price\"})\n\t\t\treturn\n\t\t}\n\t\tfilter.MaxPrice = &amp;v\n\t}\n\tif
+        filter.MinPrice != nil &amp;&amp; filter.MaxPrice != nil &amp;&amp; *filter.MinPrice
+        &gt; *filter.MaxPrice {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\":
+        \"min_price должен быть меньше или равен max_price\"})\n\t\treturn\n\t}\n\n\tfilter.InStock
+        = parseInStock(c.Query(\"in_stock\"))\n\n\tc.JSON(http.StatusOK, gin.H{\"data\":
+        serviceGetAll(filter)})\n}</code></pre>\n"
+      parameters:
+      - description: Minimum price filter
+        in: query
+        name: min_price
+        type: integer
+      - description: Maximum price filter
+        in: query
+        name: max_price
+        type: integer
+      - description: Filter by stock availability
+        in: query
+        name: in_stock
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of products
+          schema:
+            items:
+              $ref: '#/definitions/main.Products'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 'Handler Get Products with filters: min, max, in_stock'
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      description: Deletes a product by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deletion confirmation
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete product by id
+      tags:
+      - Products
+    get:
+      description: "Возвращает один товар\n\n**Реализация:**\n\n<pre><code>func handleGetProductByID(c
+        *gin.Context) {\n\tid, err := strconv.ParseInt(c.Param(\"id\"), 10, 64)\n\tif
+        err != nil {\n\t\tc.JSON(http.StatusBadRequest, gin.H{\"error\": \"Некорректный
+        формат id\"})\n\t\treturn\n\t}\n\n\tp := serviceGetByID(id)\n\tif p == nil
+        {\n\t\tc.JSON(http.StatusNotFound, gin.H{\"error\": \"Продукт не найден\"})\n\t\treturn\n\t}\n\n\tc.JSON(http.StatusOK,
+        gin.H{\"data\": p})\n}</code></pre>\n"
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product
+          schema:
+            $ref: '#/definitions/main.Products'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Handler Get Products by id
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing product by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/main.Products'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated product
+          schema:
+            $ref: '#/definitions/main.Products'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update product by id
+      tags:
+      - Products
+swagger: "2.0"
