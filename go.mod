@@ -1,4 +1,4 @@
-module makarov_project
+module github.com/Ilpaka/go-products-api
 
 go 1.25.5
 

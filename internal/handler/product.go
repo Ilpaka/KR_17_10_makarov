@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"makarov_project/internal/model"
-	"makarov_project/internal/service"
+	"github.com/Ilpaka/go-products-api/internal/model"
+	"github.com/Ilpaka/go-products-api/internal/service"
 )
 
 type ProductHandler struct {

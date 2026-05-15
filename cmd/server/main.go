@@ -9,12 +9,12 @@
 package main
 
 import (
-	"makarov_project/internal/config"
-	"makarov_project/internal/handler"
-	"makarov_project/internal/repository"
-	"makarov_project/internal/service"
+	"github.com/Ilpaka/go-products-api/internal/config"
+	"github.com/Ilpaka/go-products-api/internal/handler"
+	"github.com/Ilpaka/go-products-api/internal/repository"
+	"github.com/Ilpaka/go-products-api/internal/service"
 
-	_ "makarov_project/docs"
+	_ "github.com/Ilpaka/go-products-api/docs"
 )
 
 func main() {

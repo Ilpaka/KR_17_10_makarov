@@ -5,9 +5,9 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"makarov_project/internal/config"
-	"makarov_project/internal/middleware"
-	"makarov_project/internal/service"
+	"github.com/Ilpaka/go-products-api/internal/config"
+	"github.com/Ilpaka/go-products-api/internal/middleware"
+	"github.com/Ilpaka/go-products-api/internal/service"
 )
 
 func NewRouter(cfg *config.Config, svc *service.ProductService) *gin.Engine {

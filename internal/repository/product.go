@@ -1,6 +1,6 @@
 package repository
 
-import "makarov_project/internal/model"
+import "github.com/Ilpaka/go-products-api/internal/model"
 
 type ProductRepo struct {
 	items []model.Products

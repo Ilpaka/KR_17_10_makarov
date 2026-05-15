@@ -1,6 +1,6 @@
-# KR_17_10_makarov
+# go-products-api
 
-Учебный REST API на Go: каталог товаров с JWT-аутентификацией и Swagger UI.
+REST API на Go (Gin): каталог товаров с JWT-аутентификацией и Swagger UI. Учебный проект.
 
 ## Стек
 
@@ -21,8 +21,8 @@
 ## Установка
 
 ```bash
-git clone https://github.com/Ilpaka/KR_17_10_makarov.git
-cd KR_17_10_makarov
+git clone https://github.com/Ilpaka/go-products-api.git
+cd go-products-api
 go mod download
 ```
 

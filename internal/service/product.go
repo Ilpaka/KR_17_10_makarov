@@ -3,8 +3,8 @@ package service
 import (
 	"strings"
 
-	"makarov_project/internal/model"
-	"makarov_project/internal/repository"
+	"github.com/Ilpaka/go-products-api/internal/model"
+	"github.com/Ilpaka/go-products-api/internal/repository"
 )
 
 type ProductFilter struct {

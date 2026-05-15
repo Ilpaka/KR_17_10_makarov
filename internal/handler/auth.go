@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"makarov_project/internal/config"
+	"github.com/Ilpaka/go-products-api/internal/config"
 )
 
 type AuthHandler struct {
